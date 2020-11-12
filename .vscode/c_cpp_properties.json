@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**;D:\\c++dev\\boost_1_74_0\\win10_build32\\include\\boost-1_74"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "C:/mingw-w64/x86_64-8.1.0-win32-seh-rt_v6-rev0/mingw64/bin/gcc.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "msvc-x86"
+        }
+    ],
+    "version": 4
+}
