@@ -16,11 +16,13 @@
     <ClCompile Include="Minizip\iowin32.c" />
     <ClCompile Include="Minizip\unzip.c" />
     <ClCompile Include="Minizip\zip.c" />
+    <ClCompile Include="Util\debug_printf.cpp" />
     <ClCompile Include="Util\Jinja2Light.cpp" />
     <ClCompile Include="Util\Logging.cpp" />
-    <ClCompile Include="Util\mappedfile.c" />
+    <ClCompile Include="Util\mappedfile.cpp" />
     <ClCompile Include="Util\StringHelper.cpp" />
     <ClCompile Include="WordMarker.cpp" />
+    <ClCompile Include="WordMarker2.cpp" />
     <ClCompile Include="XMLOperation.cpp" />
     <ClCompile Include="ZipHelper2.cpp" />
   </ItemGroup>
@@ -32,11 +34,13 @@
     <ClInclude Include="Minizip\zconf.h" />
     <ClInclude Include="Minizip\zip.h" />
     <ClInclude Include="Minizip\zlib.h" />
+    <ClInclude Include="Util\debug_printf.h" />
     <ClInclude Include="Util\Jinja2Light.h" />
     <ClInclude Include="Util\Logging.h" />
     <ClInclude Include="Util\mappedfile.h" />
     <ClInclude Include="Util\StringHelper.h" />
     <ClInclude Include="WordMarker.h" />
+    <ClInclude Include="WordMarker2.h" />
     <ClInclude Include="XmlOperation.h" />
     <ClInclude Include="ZipHelper2.h" />
   </ItemGroup>
@@ -71,8 +75,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\devdev\boost_1_74_0\win10_build32\include\boost-1_74;include;$(IncludePath)</IncludePath>
-    <LibraryPath>lib;D:\devdev\boost_1_74_0\win10_build32\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\c++dev\boost_1_74_0\win10_build32\include\boost-1_74;include;$(IncludePath)</IncludePath>
+    <LibraryPath>lib;D:\c++dev\boost_1_74_0\win10_build32\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

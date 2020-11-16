@@ -51,11 +51,17 @@
     <ClCompile Include="XMLOperation.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Util\mappedfile.c">
-      <Filter>Util</Filter>
-    </ClCompile>
     <ClCompile Include="WordMarker.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="WordMarker2.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\debug_printf.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\mappedfile.cpp">
+      <Filter>Util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -99,6 +105,12 @@
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="WordMarker.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\debug_printf.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="WordMarker2.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

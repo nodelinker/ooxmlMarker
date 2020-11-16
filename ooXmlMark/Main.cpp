@@ -15,7 +15,8 @@
 #include "Util/Logging.h"
 
 #include "XmlOperation.h"
-#include "WordMarker.h"
+// #include "WordMarker.h"
+#include "WordMarker2.h"
 
 
 namespace fs = boost::filesystem;
@@ -375,136 +376,29 @@ int main(int argc, char **argv){
 	//delete wmk;
 
 
-	std::string wparagraphMarkContent = R"(
-<w:r xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas"
-  xmlns:cx="http://schemas.microsoft.com/office/drawing/2014/chartex"
-  xmlns:cx1="http://schemas.microsoft.com/office/drawing/2015/9/8/chartex"
-  xmlns:cx2="http://schemas.microsoft.com/office/drawing/2015/10/21/chartex"
-  xmlns:cx3="http://schemas.microsoft.com/office/drawing/2016/5/9/chartex"
-  xmlns:cx4="http://schemas.microsoft.com/office/drawing/2016/5/10/chartex"
-  xmlns:cx5="http://schemas.microsoft.com/office/drawing/2016/5/11/chartex"
-  xmlns:cx6="http://schemas.microsoft.com/office/drawing/2016/5/12/chartex"
-  xmlns:cx7="http://schemas.microsoft.com/office/drawing/2016/5/13/chartex"
-  xmlns:cx8="http://schemas.microsoft.com/office/drawing/2016/5/14/chartex"
-  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  xmlns:aink="http://schemas.microsoft.com/office/drawing/2016/ink"
-  xmlns:am3d="http://schemas.microsoft.com/office/drawing/2017/model3d"
-  xmlns:o="urn:schemas-microsoft-com:office:office"
-  xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
-  xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"
-  xmlns:v="urn:schemas-microsoft-com:vml"
-  xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing"
-  xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
-  xmlns:w10="urn:schemas-microsoft-com:office:word"
-  xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-  xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"
-  xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml"
-  xmlns:w16cex="http://schemas.microsoft.com/office/word/2018/wordml/cex"
-  xmlns:w16cid="http://schemas.microsoft.com/office/word/2016/wordml/cid"
-  xmlns:w16="http://schemas.microsoft.com/office/word/2018/wordml"
-  xmlns:w16se="http://schemas.microsoft.com/office/word/2015/wordml/symex"
-  xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup"
-  xmlns:wpi="http://schemas.microsoft.com/office/word/2010/wordprocessingInk"
-  xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml"
-  xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape">
-  <w:rPr>
-    <w:b/>
-  </w:rPr>
-  <w:drawing>
-    <wp:anchor distT="0" distB="0" distL="114300" distR="114300" simplePos="1" relativeHeight="251658240" behindDoc="1" locked="0" layoutInCell="1" allowOverlap="1">
-      <wp:simplePos x="3314700" y="1569085"/>
-      <wp:positionH relativeFrom="column">
-        <wp:posOffset>0</wp:posOffset>
-      </wp:positionH>
-      <wp:positionV relativeFrom="paragraph">
-        <wp:posOffset>0</wp:posOffset>
-      </wp:positionV>
-      <wp:extent cx="2324100" cy="1892300"/>
-      <wp:effectExtent l="0" t="0" r="0" b="0"/>
-      <wp:wrapNone/>
-      <wp:docPr id="2" name="图片" hidden="1" title="klsjlfksj" descr="mark"/>
-      <wp:cNvGraphicFramePr>
-        <a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/>
-      </wp:cNvGraphicFramePr>
-      <a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
-        <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
-          <pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
-            <pic:nvPicPr>
-              <pic:cNvPr id="2" name="图片 1" descr="This is the description" hidden="1" title="This is the title"/>
-              <pic:cNvPicPr/>
-            </pic:nvPicPr>
-            <pic:blipFill>
-              <a:blip r:embed="rId6"/>
-              <a:stretch>
-                <a:fillRect/>
-              </a:stretch>
-            </pic:blipFill>
-            <pic:spPr>
-              <a:xfrm>
-                <a:off x="0" y="0"/>
-                <a:ext cx="2324100" cy="1892300"/>
-              </a:xfrm>
-              <a:prstGeom prst="rect">
-                <a:avLst/>
-              </a:prstGeom>
-            </pic:spPr>
-          </pic:pic>
-        </a:graphicData>
-      </a:graphic>
-    </wp:anchor>
-  </w:drawing>
-</w:r>)";
+	// --------------------------------------------------------------------
 
-	xmlDocPtr paragraphDoc = xmlReadMemory(
-		wparagraphMarkContent.data(), wparagraphMarkContent.length() + 1,
-		NULL, NULL, 0);
-
-	if (!paragraphDoc){
-		std::cout << "XML INIT FROM STRING FAILED.." << std::endl;
+	fs::path demoPath = fs::current_path() / "demo.docx";
+	if (!fs::exists(demoPath)){
+		std::cout << "demo.docx can't found." << "" << std::endl;
 		return -1;
 	}
 
-	fs::path documentPath = fs::current_path() / "demo-1/word/document.xml";
-	assert(fs::exists(documentPath));
-
-	xmlXPathObjectPtr xpathObj = NULL;
-	XMLOperation *xmlOp = new XMLOperation(documentPath.string().data());
-
-	// 找到document.xml内所有段落
-	int foundSize = xmlOp->xmlXPathFindObjects(BAD_CAST "//w:p", xpathObj);
-	if (foundSize == 0) {
-		std::cout << "[AAA] can't find marked element.." << std::endl;
+	fs::path tempDocPath = fs::current_path() / fs::unique_path();
+	if (fs::exists(tempDocPath) && fs::is_directory(tempDocPath)){
+		std::cout << "tmp directory exists." << "" << std::endl;
 		return -1;
 	}
-	std::cout << "found node size :" << foundSize << std::endl;
 
-
-	xmlNodeSetPtr nodes = xpathObj->nodesetval;
-	xmlNodePtr firstNode = nodes->nodeTab[0];
-
-	xmlNodePtr paragraphNode = xmlDocCopyNode(
-		xmlDocGetRootElement(paragraphDoc),
-		firstNode->doc,
-		1);
-	xmlFreeDoc(paragraphDoc);
-
-	if (!paragraphNode){
-		std::cout << "Copy node failed." << std::endl;
+	if (!fs::create_directory(tempDocPath)){
+		std::cout << "tmp directory can't create." << std::endl;
 		return -1;
 	}
-	
-	xmlNodePtr addedNode = xmlAddChildList(firstNode, paragraphNode->children);
-	if (!addedNode) {
-		xmlFreeNode(paragraphNode);
-		return -1;
-	}
-	paragraphNode->children = NULL; // Thanks to milaniez from stackoverflow
-	paragraphNode->last = NULL;     // for fixing
-	
-	fs::path outputPath = fs::current_path() / "demo-1/word/document.xml.bak";
-	xmlOp->outputFile(outputPath.string());
 
-	delete xmlOp;
+	WordMarker2 *wmk = new WordMarker2(demoPath.string(), tempDocPath.string());
+	wmk->WaterMarkGenerate("hello world22222222222222222");
+
+
 
 
 	return 0;

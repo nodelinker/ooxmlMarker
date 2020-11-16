@@ -1,15 +1,16 @@
 #include "WordMarker.h"
+#include "Util/debug_printf.h"
 
 WordMarker::WordMarker(std::string wordPath):m_strWordFilePath(wordPath){
 
 	fs::path tempDocPath = fs::current_path() / fs::unique_path();
 	if (fs::exists(tempDocPath) && fs::is_directory(tempDocPath)){
-		DEBUGPRINT("tmp directory exists.");
+		printfTrace("tmp directory exists.");
 		return ;
 	}
 
 	if (!fs::create_directory(tempDocPath)){
-		DEBUGPRINT("tmp directory can't create.");
+		printfTrace("tmp directory can't create.");
 		return ;
 	}
 
@@ -40,8 +41,8 @@ m_strWordFilePath(wordPath),m_strWordTempPath(wordTempPath){
 
 void WordMarker::CheckHeader(){
 
-	// step 1 ¼ì²éÊÇ·ñ´æÔÚheaderÔÚÖ÷ÎÄµµµÄrelationÎÄ¼şÖĞ¡£
-	// C:\\Users\\xszhang\\Desktop\\Êı×ÖË®Ó¡\\sample\\docx\\a\\demo1\\word\\_rels\\document.xml.rels
+	// step 1 æ£€æŸ¥æ˜¯å¦å­˜åœ¨headeråœ¨ä¸»æ–‡æ¡£çš„relationæ–‡ä»¶ä¸­ã€‚
+	// C:\\Users\\xszhang\\Desktop\\æ•°å­—æ°´å°\\sample\\docx\\a\\demo1\\word\\_rels\\document.xml.rels
 	m_DocWordRelPath = fs::path(m_strWordTempPath) / "word/_rels/document.xml.rels";
 	m_DocWordRelation = new XMLOperation(m_DocWordRelPath.string().data());
 	xmlNodePtr root = m_DocWordRelation->xmlGetRootNode();
@@ -68,7 +69,7 @@ void WordMarker::CheckHeader(){
 
 		std::string data = std::string((char*)typeProp);
 		if (std::regex_match(data, pattern)) {
-			DEBUGPRINT("found Property Type: %s, ID %s\n", typeProp, rIdProp);
+			printfTrace("found Property Type: %s, ID %s\n", typeProp, rIdProp);
 			m_bHasHeader = true;
 			m_strHeaderId = (char*)rIdProp;
 			m_strHeaderTarget = (char*)targetProp;
@@ -89,12 +90,12 @@ std::string WordMarker::GetMaxRefId(){
 
 bool WordMarker::FindWater(){
 
-	// Ä¿Ç°Ë®Ó¡ĞÅÏ¢ÔİÊ±·ÅÔÚÍ·Àï£¬Èç¹ûÍ·²»ÔÚÖ±½Ó·µ»ØÊ§°Ü
+	// ç›®å‰æ°´å°ä¿¡æ¯æš‚æ—¶æ”¾åœ¨å¤´é‡Œï¼Œå¦‚æœå¤´ä¸åœ¨ç›´æ¥è¿”å›å¤±è´¥
 	if (!m_bHasHeader){
 		return false;
 	}
 
-	// ¶ÁÈ¡header.xmlÎÄ¼ş£¬²¢¼ì²éÊÇ·ñ´æÔÚË®Ó¡ĞÅÏ¢
+	// è¯»å–header.xmlæ–‡ä»¶ï¼Œå¹¶æ£€æŸ¥æ˜¯å¦å­˜åœ¨æ°´å°ä¿¡æ¯
 	fs::path headerPath = m_strWordTempPath / fs::path("word") / m_strHeaderTarget;
 	if (!fs::exists(headerPath)){
 		return false;
@@ -102,7 +103,7 @@ bool WordMarker::FindWater(){
 	std::cout << headerPath.string() << std::endl;
 	
 
-	// Todo: È¥header.xmlÄÚ¼ì²éÊÇ·ñ´æÔÚ¶şÎ¬ÂëÄÚÈİ
+	// Todo: å»header.xmlå†…æ£€æŸ¥æ˜¯å¦å­˜åœ¨äºŒç»´ç å†…å®¹
 	xmlXPathObjectPtr xpathObj = NULL;
 	auto headerDoc = XMLOperation(headerPath.string().data());
 
@@ -112,14 +113,14 @@ bool WordMarker::FindWater(){
 	ns.push_back("pic=http://schemas.openxmlformats.org/drawingml/2006/picture");
 	headerDoc.xmlXPathRegisterNamespace(ns);
 
-	// ÕâÀïÓ¦¸ÃÔö¼ÓÒ»¸öÅĞ¶Ï£¬Èç¹ûÃ»ÓĞheaderÃ»Ë®Ó¡µÄÇé¿ö
+	// è¿™é‡Œåº”è¯¥å¢åŠ ä¸€ä¸ªåˆ¤æ–­ï¼Œå¦‚æœæ²¡æœ‰headeræ²¡æ°´å°çš„æƒ…å†µ
 	// watermark signature tag by desc with "mark"
 	int foundSize = headerDoc.xmlXPathFindObjects(
 		BAD_CAST "//w:hdr/w:p/w:r/w:drawing/wp:anchor/a:graphic/a:graphicData/pic:pic/pic:nvPicPr/pic:cNvPr[@descr='mark']",
 		xpathObj);
 
 	if (foundSize == 0) {
-		DEBUGPRINT("[AAA] can't find marked element..");
+		printfTrace("[AAA] can't find marked element..");
 		return false;
 	}
 
@@ -140,7 +141,7 @@ bool WordMarker::FindWater(){
 	xpathObj = NULL;
 	foundSize = headerDoc.xmlXPathFindObjects(picNode, BAD_CAST "pic:blipFill/a:blip", xpathObj);
 	if (foundSize == 0) {
-		DEBUGPRINT("[AAA] can't find pic:blipFill element..");
+		printfTrace("[AAA] can't find pic:blipFill element..");
 		return false;
 	}
 
@@ -161,16 +162,16 @@ bool WordMarker::FindWater(){
 	firstNode = NULL;
 
 
-	// ÕâÀïµÄ¿Ó±êÊ¶Ò»ÏÂ
-	// Èç¹ûxml¶¨ÒåÁË£¬ÀàËÆÕâÖÖÃ»ÓĞÃû×ÖµÄnamespace¡£
+	// è¿™é‡Œçš„å‘æ ‡è¯†ä¸€ä¸‹
+	// å¦‚æœxmlå®šä¹‰äº†ï¼Œç±»ä¼¼è¿™ç§æ²¡æœ‰åå­—çš„namespaceã€‚
 	// xmlns="http://schemas.openxmlformats.org/package/2006/relationships"
-	// ±ØĞë¸øËûÉèÖÃÒ»¸öÃû×Ö£¬²¢ÔÚÕâ¸önamespaceÖĞ½øĞĞxpath²éÑ¯
+	// å¿…é¡»ç»™ä»–è®¾ç½®ä¸€ä¸ªåå­—ï¼Œå¹¶åœ¨è¿™ä¸ªnamespaceä¸­è¿›è¡ŒxpathæŸ¥è¯¢
 
 	boost::format fmt = boost::format("//null:Relationships/null:Relationship[@Id='%s']") % (char*)markedRelId;
 	std::string pattern = fmt.str();
 	foundSize = headerRelDoc.xmlXPathFindObjects(BAD_CAST pattern.data(), xpathObj);
 	if (foundSize == 0) {
-		DEBUGPRINT("[AAA] can't find Relationship element id is {}.", markedRelId);
+		printfTrace("[AAA] can't find Relationship element id is {}.", markedRelId);
 		return false;
 	}
 	nodes = xpathObj->nodesetval;
@@ -187,7 +188,7 @@ bool WordMarker::FindWater(){
 
 bool WordMarker::WaterMarkGenerate(std::string message){
 
-	// Èç¹ûÃ»ÓĞheader refÎÄ¼şÒıÓÃ£¬ÔòÊ¹ÓÃtemplate½¨Á¢ĞÂµÄheader²¢Ìí¼Óreference.
+	// å¦‚æœæ²¡æœ‰header refæ–‡ä»¶å¼•ç”¨ï¼Œåˆ™ä½¿ç”¨templateå»ºç«‹æ–°çš„headerå¹¶æ·»åŠ reference.
 	std::string maxRefId = this->GetMaxRefId();
 	unsigned int maxId = 0;
 
@@ -202,7 +203,7 @@ bool WordMarker::WaterMarkGenerate(std::string message){
 	fs::path docHeaderRelPath = fs::path(m_strWordTempPath) / "word/_rels/header1.xml.rels";
 	fs::copy_file(wordTemplates / "default-header.xml.rels", docHeaderRelPath);
 
-	// ´´½¨¶şÎ¬ÂëË®Ó¡
+	// åˆ›å»ºäºŒç»´ç æ°´å°
 	fs::path signaturePath = fs::path(m_strWordTempPath) / "word/media/image1.png";
 	if (!fs::exists(signaturePath.parent_path()) || !fs::is_directory(signaturePath.parent_path())){
 		fs::create_directories(signaturePath.parent_path());
@@ -210,17 +211,17 @@ bool WordMarker::WaterMarkGenerate(std::string message){
 	QRGenerator qrg;
 	qrg.GeneratorQR("message", signaturePath.string());
 
-	// Í¨¹ıtemplateäÖÈ¾µÄ·½Ê½Ğ´Èë£¬ÔİÊ±²»ÓÃ
+	// é€šè¿‡templateæ¸²æŸ“çš„æ–¹å¼å†™å…¥ï¼Œæš‚æ—¶ä¸ç”¨
 	// writeFile(docHeaderRelPath.string(), env_default.render_file("\\default-header.xml.rels", data));
 
 	// render default header template
 	fs::path docHeaderPath = fs::path(m_strWordTempPath) / "word/header1.xml";
 	fs::copy_file(wordTemplates / "default-header-mark.xml", docHeaderPath);
 
-	// Í¨¹ıtemplateäÖÈ¾µÄ·½Ê½Ğ´Èë£¬ÔİÊ±²»ÓÃ
+	// é€šè¿‡templateæ¸²æŸ“çš„æ–¹å¼å†™å…¥ï¼Œæš‚æ—¶ä¸ç”¨
 	// writeFile(docHeaderPath.string(), env_default.render_file("\\default-header-mark.xml", data));
 
-	// [Content_Types].xml ĞèÒªÓĞ¶ÔheaderÎÄ¼şµÄÒıÓÃ
+	// [Content_Types].xml éœ€è¦æœ‰å¯¹headeræ–‡ä»¶çš„å¼•ç”¨
 	fs::path docContentTypePath = fs::path(m_strWordTempPath) / "[Content_Types].xml";
 	auto contentDoc = XMLOperation(docContentTypePath.string().data());
 
@@ -230,30 +231,30 @@ bool WordMarker::WaterMarkGenerate(std::string message){
 
 	xmlAddChild(contentDoc.xmlGetRootNode(), xxxNode);
 
-	// ¼ì²â <Default Extension="png" ContentType="image/png"/>
-	// Èç¹û²»´æÔÚÔòÌí¼Ó
-	// ÏÓÂé·³±©Á¦Ìí¼Ó
+	// æ£€æµ‹ <Default Extension="png" ContentType="image/png"/>
+	// å¦‚æœä¸å­˜åœ¨åˆ™æ·»åŠ 
+	// å«Œéº»çƒ¦æš´åŠ›æ·»åŠ 
 	xxxNode = xmlNewNode(0, BAD_CAST "Default");
 	xmlNewProp(xxxNode, BAD_CAST "Extension", BAD_CAST "png");
 	xmlNewProp(xxxNode, BAD_CAST "ContentType", BAD_CAST "image/png");
 	xmlAddChild(contentDoc.xmlGetRootNode(), xxxNode);
 
-	//// ´Ë´¦Ğ´Èë.bakÎÄ¼ş¿¼ÂÇ£¬´´½¨ -> É¾³ı -> ¸ÄÃûµÄ·½Ê½£¬·ÀÖ¹³åÍ»¡£
-	//// ´´½¨ÁÙÊ±ÎÄ¼ş
+	//// æ­¤å¤„å†™å…¥.bakæ–‡ä»¶è€ƒè™‘ï¼Œåˆ›å»º -> åˆ é™¤ -> æ”¹åçš„æ–¹å¼ï¼Œé˜²æ­¢å†²çªã€‚
+	//// åˆ›å»ºä¸´æ—¶æ–‡ä»¶
 	//tempPath = docContentTypePath.str() + ".bak";
 	//contentDoc.outputFile(tempPath.str());
 	//
-	//// É¾³ıÔ­ÎÄ¼ş
+	//// åˆ é™¤åŸæ–‡ä»¶
 	//std::remove(docContentTypePath.str().data());
 	//
-	//// ĞŞ¸ÄÎÄ¼şÃû£¬Ìæ»»Ô­ÎÄ¼şÃû¡£
+	//// ä¿®æ”¹æ–‡ä»¶åï¼Œæ›¿æ¢åŸæ–‡ä»¶åã€‚
 	//std::rename(tempPath.str().data(), docContentTypePath.str().data());
 	contentDoc.outputFile(docContentTypePath.string());
 
 	maxId++;
 	std::string newMaxRefId = std::string(std::string("rId") + std::to_string(maxId));
 
-	// ¶ÁÈ¡word/_rels/document.xml.rels,ÔÚÆä´´½¨header id²¢ÒıÓÃ
+	// è¯»å–word/_rels/document.xml.rels,åœ¨å…¶åˆ›å»ºheader idå¹¶å¼•ç”¨
 	xmlNodePtr newNode = xmlNewNode(0, BAD_CAST "Relationship");
 	xmlNewProp(newNode, BAD_CAST "Id", BAD_CAST newMaxRefId.data());
 	xmlNewProp(newNode, BAD_CAST "Type", BAD_CAST "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header");
@@ -262,8 +263,8 @@ bool WordMarker::WaterMarkGenerate(std::string message){
 	m_DocWordRelation->outputFile(m_DocWordRelPath.string());
 
 	/**
-	* ´ËÊ±relationshipÒÑ¾­´´½¨Íê³ÉÁË£¬¸Ã²Ù×÷word/document.xmlÎÄ¼şÁË
-	* Èç¹ûÃ»ÓĞheaderµÄ»°,ĞèÒª´´½¨element¶ÔheaderÒıÓÃ
+	* æ­¤æ—¶relationshipå·²ç»åˆ›å»ºå®Œæˆäº†ï¼Œè¯¥æ“ä½œword/document.xmlæ–‡ä»¶äº†
+	* å¦‚æœæ²¡æœ‰headerçš„è¯,éœ€è¦åˆ›å»ºelementå¯¹headerå¼•ç”¨
 	*/
 	// read main doc, document.xml
 	fs::path wordDocPath = fs::path(m_strWordTempPath) / "word/document.xml";
@@ -271,12 +272,12 @@ bool WordMarker::WaterMarkGenerate(std::string message){
 	auto wordDoc = XMLOperation(wordDocPath.string().data());
 	int foundSize = wordDoc.xmlXPathFindObjects(BAD_CAST "//w:document/w:body/w:sectPr", xpathObj);
 	if (foundSize == 0) {
-		DEBUGPRINT("[BBB] document.xml can't find element..");
+		printfTrace("[BBB] document.xml can't find element..");
 		return false;
 	}
 
-	// ÕâÀïlibxml2¿´À´²»ĞèÒªQname, ÕâÀïµÄwĞèÒª¸úroot¶ÔÆä¡£
-	// ¿ÉÄÜĞèÒªÓÃhref·´²é£¬Èİ´íÂÊ»á±È½Ï¸ß¡£
+	// è¿™é‡Œlibxml2çœ‹æ¥ä¸éœ€è¦Qname, è¿™é‡Œçš„wéœ€è¦è·Ÿrootå¯¹å…¶ã€‚
+	// å¯èƒ½éœ€è¦ç”¨hrefåæŸ¥ï¼Œå®¹é”™ç‡ä¼šæ¯”è¾ƒé«˜ã€‚
 	xmlNodePtr newNodeRef = xmlNewNode(0, BAD_CAST "w:headerReference");
 	xmlNewProp(newNodeRef, BAD_CAST "r:id", BAD_CAST newMaxRefId.data());
 	xmlNewProp(newNodeRef, BAD_CAST "w:type", BAD_CAST "default");
@@ -293,7 +294,7 @@ bool WordMarker::WaterMarkGenerate(std::string message){
 bool WordMarker::WaterMarkUpdate(std::string message){
 
 	if (!m_bMarked){
-		DEBUGPRINT("can't found watermark file.");
+		printfTrace("can't found watermark file.");
 		return false;
 	}
 
@@ -307,10 +308,10 @@ bool WordMarker::WaterMarkUpdate(std::string message){
 
 	qrMsg = qrMsg + ";" + message;
 
-	// É¾³ıÔ­Ë®Ó¡ÎÄ¼ş
+	// åˆ é™¤åŸæ°´å°æ–‡ä»¶
 	fs::remove(m_strWaterMarkFile);
 
-	// ¸üĞÂË®Ó¡
+	// æ›´æ–°æ°´å°
 	QRGenerator qrg;
 	qrg.GeneratorQR(qrMsg, m_strWaterMarkFile);
 
