@@ -15,7 +15,7 @@
 #include "Util/Logging.h"
 
 #include "XmlOperation.h"
-// #include "WordMarker.h"
+//#include "WordMarker.h"
 #include "WordMarker2.h"
 
 
@@ -396,10 +396,50 @@ int main(int argc, char **argv){
 	}
 
 	WordMarker2 *wmk = new WordMarker2(demoPath.string(), tempDocPath.string());
-	wmk->WaterMarkGenerate("hello world22222222222222222");
 
 
+	std::cout << "mark status : " << wmk->isMarked() << std::endl;
+	wmk->WaterMarkGenerate("hello marked.");
+	std::cout << "has been marked. " << std::endl;
 
+	fs::path output = fs::current_path() / "demo.marked.docx";
+	wmk->SaveToFile( output.string());
+
+	// *********************************************************
+
+	demoPath = fs::current_path() / "demo.marked.docx";
+	if (!fs::exists(demoPath)){
+		std::cout << "demo.docx can't found." << "" << std::endl;
+		return -1;
+	}
+
+	tempDocPath = fs::current_path() / fs::unique_path();
+	if (fs::exists(tempDocPath) && fs::is_directory(tempDocPath)){
+		std::cout << "tmp directory exists." << "" << std::endl;
+		return -1;
+	}
+
+	if (!fs::create_directory(tempDocPath)){
+		std::cout << "tmp directory can't create." << std::endl;
+		return -1;
+	}
+
+	WordMarker2 *wmk2 = new WordMarker2(demoPath.string(), tempDocPath.string());
+	std::cout << "mark status : " << wmk2->isMarked() << std::endl;
+
+	if (wmk2->isMarked()){
+
+		std::string message = wmk2->readMark();
+		message += "; updated";
+		wmk2->WaterMarkUpdate(message);
+		
+		fs::path output = fs::current_path() / "demo.updated.docx";
+		wmk2->SaveToFile(output.string());
+
+	}
+
+	delete wmk;
+	delete wmk2;
 
 	return 0;
 }

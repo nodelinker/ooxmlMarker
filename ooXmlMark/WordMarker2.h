@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include <QRManager/QRCommon.h>
 #include <QRManager/QRReader.h>
 #include <QRManager/QRGenerator.h>
 
@@ -35,11 +36,14 @@ public:
 
 	void SaveToFile(std::string outputPath);
 
+	bool readMark(std::string &message);
+	std::string readMark();
+ 
+
 	bool isMarked(){ return m_bMarked; }
 
 
 private:
-	XMLOperation *m_DocWordRelation;
 
 	std::string m_strWordFilePath = "";
 	std::string m_strWordTempPath = "";

@@ -1,4 +1,5 @@
 #include "ZipHelper2.h"
+#include "Util/debug_printf.h"
 
 #include <boost/filesystem.hpp>
 
@@ -160,7 +161,7 @@ int ZipHelper2::UnZipFile(std::string Src, std::string Dest)
 			NULL, 0, NULL, 0);
 
 		if (UNZ_OK != err){
-			printf("[error] do_extract %d with zipfile in unzGetCurrentFileInfo\n", err);
+			printfTrace("[error] do_extract %d with zipfile in unzGetCurrentFileInfo\n", err);
 			return err;
 		}
 
@@ -186,7 +187,7 @@ int ZipHelper2::UnZipFile(std::string Src, std::string Dest)
 		//err = unzOpenCurrentFilePassword(uf, password);        
 		err = unzOpenCurrentFile(uf);
 		if (err != UNZ_OK) {
-			printf("error %d with zipfile in unzOpenCurrentFilePassword\n", err);
+			printfTrace("error %d with zipfile in unzOpenCurrentFilePassword\n", err);
 			return err
 				;
 		}
@@ -201,19 +202,19 @@ int ZipHelper2::UnZipFile(std::string Src, std::string Dest)
 		FILE* fOut = NULL;
 		err = fopen_s(&fOut, fullPath.string().data(), "wb");
 		if (err != 0) {
-			printf("error opening %s\n", fullPath.string().data());
+			printfTrace("error opening %s\n", fullPath.string().data());
 		}
 		else {
 
 			if (!fOut) {
-				printf("error %d with zipfile in unzReadCurrentFile\n", err);
+				printfTrace("error %d with zipfile in unzReadCurrentFile\n", err);
 				return -1;
 			}
 			// 内容写入文件
 			do {
 				err = unzReadCurrentFile(uf, buf, WRITE_BUFFER_SIZE);
 				if (err < 0) {
-					printf("error %d with zipfile in unzReadCurrentFile\n", err);
+					printfTrace("error %d with zipfile in unzReadCurrentFile\n", err);
 					break;
 				}
 				else {
@@ -225,7 +226,7 @@ int ZipHelper2::UnZipFile(std::string Src, std::string Dest)
 
 		err = unzCloseCurrentFile(uf);
 		if (err != UNZ_OK) {
-			printf("error %d with zipfile in unzCloseCurrentFile\n", err);
+			printfTrace("error %d with zipfile in unzCloseCurrentFile\n", err);
 		}
 		// delete buf;
 		return 0;
@@ -240,7 +241,7 @@ int ZipHelper2::UnZipFile(std::string Src, std::string Dest)
 			ret = unzGoToNextFile(uf);
 			if (UNZ_OK != ret)
 			{
-				printf("[error] %d with zipfile in unzGoToNextFile\n", ret);
+				printfTrace("[error] %d with zipfile in unzGoToNextFile\n", ret);
 				break;
 			}
 		}
@@ -298,7 +299,7 @@ int ZipHelper2::ZipFile(std::string Dir, std::string Dest) {
 			-MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY,
 			NULL, crcFile, zip64);
 		if (err != ZIP_OK) {
-			printf("[error] XXX in opening %s in zipfile\n", Dest.data());
+			printfTrace("[error] XXX in opening %s in zipfile\n", Dest.data());
 			return -1;
 		}
 
@@ -306,7 +307,7 @@ int ZipHelper2::ZipFile(std::string Dir, std::string Dest) {
 		fopen_s(&file, zipfile.data(), "rb");
 		if (file == NULL) {
 			err = ZIP_ERRNO;
-			printf("[error] XXX in opening %s for reading\n", Dest.data());
+			printfTrace("[error] XXX in opening %s for reading\n", Dest.data());
 			return -1;
 		}
 
@@ -315,14 +316,14 @@ int ZipHelper2::ZipFile(std::string Dir, std::string Dest) {
 			size_read = (int)fread(buf, 1, WRITE_BUFFER_SIZE, file);
 			if (size_read < WRITE_BUFFER_SIZE) {
 				if (feof(file) == 0) {
-					printf("[error] XXX in reading %s\n", Dest.data());
+					printfTrace("[error] XXX in reading %s\n", Dest.data());
 					err = ZIP_ERRNO;
 				}
 			}
 			if (size_read > 0) {
 				err = zipWriteInFileInZip(zf, buf, size_read);
 				if (err < 0) {
-					printf("[error] XXX in writing %s in the zipfile\n", Dest.data());
+					printfTrace("[error] XXX in writing %s in the zipfile\n", Dest.data());
 				}
 			}
 		} while ((err == ZIP_OK) && (size_read > 0));
@@ -337,14 +338,14 @@ int ZipHelper2::ZipFile(std::string Dir, std::string Dest) {
 		else {
 			err = zipCloseFileInZip(zf);
 			if (err != ZIP_OK) {
-				printf("error in closing %s in the zipfile\n", Dest.data());
+				printfTrace("error in closing %s in the zipfile\n", Dest.data());
 			}
 		}
 	}
 
 	int errclose = zipClose(zf, NULL);
 	if (errclose != ZIP_OK) {
-		printf("error in closing %s\n", Dest.data());
+		printfTrace("error in closing %s\n", Dest.data());
 		return -1;
 	}
 

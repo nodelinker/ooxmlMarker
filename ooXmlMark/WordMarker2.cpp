@@ -38,10 +38,6 @@ m_strWordFilePath(wordPath), m_strWordTempPath(wordTempPath){
 	this->FindWaterMark();
 }
 
-WordMarker2::~WordMarker2(){
-	if (m_DocWordRelation)
-		delete m_DocWordRelation;
-}
 
 bool WordMarker2::FindWaterMark(){
 
@@ -258,8 +254,6 @@ std::string WordMarker2::WordHiddenImageTemplte(std::string rId){
 }
 
 bool WordMarker2::WaterMarkGenerate(std::string message){
-
-	__asm { int 3 };
 	
 	std::string maxRelId;
 	fs::path documentRelPath = fs::path(m_strWordTempPath) / "word/_rels/document.xml.rels";
@@ -309,7 +303,7 @@ bool WordMarker2::WaterMarkGenerate(std::string message){
 		fs::create_directories(signaturePath.parent_path());
 	}
 	QRGenerator qrg;
-	qrg.GeneratorQR(message, signaturePath.string());
+	qrg.GeneratorQR(message.data(), message.length(), signaturePath.string().data(), 0x0);
 
 	// [Content_Types].xml 需要有对header文件的引用
 	fs::path docContentTypePath = fs::path(m_strWordTempPath) / "[Content_Types].xml";
@@ -357,7 +351,7 @@ bool WordMarker2::WaterMarkGenerate(std::string message){
 
 	if (!paragraphDoc){
 		printfTrace("Read template failed \n");
-		return -1;
+		return false;
 	}
 
 	fs::path documentPath = fs::path(m_strWordTempPath) / "word/document.xml";;
@@ -373,7 +367,7 @@ bool WordMarker2::WaterMarkGenerate(std::string message){
 	int foundSize = xmlOp->xmlXPathFindObjects(BAD_CAST "//w:p", xpathObj);
 	if (foundSize == 0) {
 		printfTrace("[AAA] does not enough paragraphs ..");
-		return -1;
+		return false;
 	}
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
 
@@ -391,7 +385,7 @@ bool WordMarker2::WaterMarkGenerate(std::string message){
 		xmlNodePtr addedNode = xmlAddChildList(firstNode, paragraphNode->children);
 		if (!addedNode) {
 			xmlFreeNode(paragraphNode);
-			return -1;
+			return false;
 		}
 		paragraphNode->children = NULL; // Thanks to milaniez from stackoverflow
 		paragraphNode->last = NULL;     // for fixing
@@ -403,4 +397,71 @@ bool WordMarker2::WaterMarkGenerate(std::string message){
 	delete xmlOp;
 
 	return true;
+}
+
+bool WordMarker2::readMark(std::string &message){
+
+	if (!m_bMarked){
+		printfTrace("this file does not marked. \n");
+		return false;
+	}
+
+	QRReader *qrr = new QRReader();
+
+	std::string qrMsg;
+	std::string filepath = m_strWaterMarkFile;
+
+	qrr->ReadQR(filepath, qrMsg);
+	std::cout << "QR message:" << qrMsg << std::endl;
+	delete qrr;
+
+	message = qrMsg;
+	return true;
+}
+
+std::string WordMarker2::readMark(){
+
+	if (!m_bMarked){
+		printfTrace("this file does not marked. \n");
+		return "";
+	}
+
+	QRReader qrr = QRReader();
+
+	char *oldMessage = NULL;
+	std::string filepath = m_strWaterMarkFile;
+	qrr.ReadQR(filepath.data(), &oldMessage);
+
+	std::string ret(oldMessage);
+
+	std::cout << "QR message:" << oldMessage << std::endl;
+	QRCommon::QRFree(oldMessage);
+	return ret;
+}
+
+bool WordMarker2::WaterMarkUpdate(std::string message){
+
+	if (!m_bMarked){
+		printfTrace("this file does not marked. \n");
+		return false;
+	}
+
+	// 删除原水印文件
+	fs::remove(m_strWaterMarkFile);
+
+	// 更新水印
+	QRGenerator qrg;
+	qrg.GeneratorQR(message.data(), message.length(), m_strWaterMarkFile.data(), 0x0);
+
+	return true;
+}
+
+void WordMarker2::SaveToFile(std::string outputPath){
+	ZipHelper2 zh;
+	zh.ZipFile(m_strWordTempPath, outputPath);
+
+	fs::remove_all(m_strWordTempPath);
+}
+
+WordMarker2::~WordMarker2(){
 }

@@ -4,14 +4,23 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef _PDF_QR_MANAGER_H_
-#define _PDF_QR_MANAGER_H_
+#ifndef _PDF_QR_COMMON_H_
+#define _PDF_QR_COMMON_H_
 
-#include "QRCommon.h"
-#include "QRGenerator.h"
-#include "QRReader.h"
-#include "PNGHelper.h"
-#include "QRBase64.h"
+#include "QRManagerDefines.h"
+#include <iostream>
+
+
+class QRMANAGER_API QRCommon
+{
+public:
+	QRCommon(void);
+	~QRCommon(void);
+
+public:
+	static void* QRMalloc(int size);
+
+	static void QRFree(void* pVoid);
+};
 
 #endif
-

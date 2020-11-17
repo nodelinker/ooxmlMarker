@@ -49,9 +49,9 @@ private:
 	std::string m_strWordFilePath = "";
 	std::string m_strWordTempPath = "";
 
-	// Ò»¸öÎÄµµÀï¿ÉÄÜ´æÔÚ¶à¸öheaderµÄÇé¿ö£¬demoÔİÊ±²»¿¼ÂÇ
-	// ¼Ù¶¨Ö»ÓĞÒ»¸öheaderÎÄ¼ş±»ÒıÓÃ
-	// µ«ÊÇÕâÀï»áÓ°ÏìË®Ó¡¸üĞÂ±ØĞëÏÈËµÃ÷
+	// æ¶“â‚¬æ¶“î…æƒå¦—ï½‰å™·é™îˆå…˜ç€›æ¨ºæ¹ªæ¾¶æ°«é‡œheaderé¨å‹¬å„éç¢‰ç´demoé†å‚›æ¤‚æ¶“å¶ˆâ‚¬å†­æª»
+	// é‹å›§ç•¾é™î…æ¹æ¶“â‚¬æ¶“çŒ¦eaderé‚å›¦æ¬¢çšî‚¢ç´©é¢?
+	// æµ£å—˜æ§¸æ©æ¬“å™·æµ¼æ°¬å¥–éå¶†æŒ‰é—ç‰ˆæ´¿é‚æ¿ç¹€æ¤¤è¯²å›ç’‡å­˜æ§‘
 	std::string m_strHeaderId = "";
 	std::string m_strHeaderTarget = "";
 	std::string m_strWaterMarkFile = "";
