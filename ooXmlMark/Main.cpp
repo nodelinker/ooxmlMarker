@@ -442,24 +442,48 @@ int main(int argc, char **argv){
 		return -1;
 	}
 
-	WordMarker2 *wmk = new WordMarker2(demoPath.string(), tempDocPath.string());
-	if (wmk->isMarked()){
-		std::string oldMessage = wmk->readMark();
-		std::cout << gArgs.inputFilePath << " " << "file signature has been found :" << oldMessage << std::endl;
 
-		gArgs.newMessage.append(";");
-		gArgs.newMessage.append(oldMessage);
-		wmk->WaterMarkUpdate(gArgs.newMessage);
-		wmk->SaveToFile(gArgs.outputFilePath);
+	while (true)
+	{
+		WordMarker2 *wmk = new WordMarker2(demoPath.string(), tempDocPath.string());
+		if (wmk->isMarked()){
+			std::string oldMessage = wmk->readMark();
+			std::cout << gArgs.inputFilePath << " " << "file signature has been found :" << oldMessage << std::endl;
+
+			gArgs.newMessage.append(";");
+			gArgs.newMessage.append(oldMessage);
+			wmk->WaterMarkUpdate(gArgs.newMessage);
+			wmk->SaveToFile(gArgs.outputFilePath);
+		}
+		else{
+			std::cout << gArgs.inputFilePath << " " << "file signature not exists." << std::endl;
+
+			wmk->WaterMarkGenerate(gArgs.newMessage);
+			wmk->SaveToFile(gArgs.outputFilePath);
+		}
+		delete wmk;
+		
+		fs::remove(gArgs.outputFilePath);
+		Sleep(1000);
 	}
-	else{
-		std::cout << gArgs.inputFilePath << " " << "file signature not exists." << std::endl;
 
-		wmk->WaterMarkGenerate(gArgs.newMessage);
-		wmk->SaveToFile(gArgs.outputFilePath);
-	}
+	//WordMarker2 *wmk = new WordMarker2(demoPath.string(), tempDocPath.string());
+	//if (wmk->isMarked()){
+	//	std::string oldMessage = wmk->readMark();
+	//	std::cout << gArgs.inputFilePath << " " << "file signature has been found :" << oldMessage << std::endl;
 
-	delete wmk;
+	//	gArgs.newMessage.append(";");
+	//	gArgs.newMessage.append(oldMessage);
+	//	wmk->WaterMarkUpdate(gArgs.newMessage);
+	//	wmk->SaveToFile(gArgs.outputFilePath);
+	//}
+	//else{
+	//	std::cout << gArgs.inputFilePath << " " << "file signature not exists." << std::endl;
+
+	//	wmk->WaterMarkGenerate(gArgs.newMessage);
+	//	wmk->SaveToFile(gArgs.outputFilePath);
+	//}
+	//delete wmk;
 
 	return 0;
 }

@@ -50,22 +50,26 @@ bool WordMarker2::FindWaterMark(){
 
 	// Todo: 去header.xml内检查是否存在二维码内容
 	xmlXPathObjectPtr xpathObj = NULL;
-	auto documentDoc = XMLOperation(documentPathj.string().data());
+	auto documentDoc = new XMLOperation(documentPathj.string().data());
 
 	// registe namespace with xml.
 	std::vector<std::string> ns;
 	ns.push_back("a=http://schemas.openxmlformats.org/drawingml/2006/main");
 	ns.push_back("pic=http://schemas.openxmlformats.org/drawingml/2006/picture");
-	documentDoc.xmlXPathRegisterNamespace(ns);
+	documentDoc->xmlXPathRegisterNamespace(ns);
 
 	// 这里应该增加一个判断，如果没有header没水印的情况
 	// watermark signature tag by desc with "mark"
-	int foundSize = documentDoc.xmlXPathFindObjects(
+	int foundSize = documentDoc->xmlXPathFindObjects(
 		BAD_CAST "//w:drawing/wp:anchor/a:graphic/a:graphicData/pic:pic/pic:nvPicPr/pic:cNvPr[@descr='mark']",
 		xpathObj);
 
 	if (foundSize == 0) {
 		printfTrace("[AAA] can't find marked element..");
+
+		if (documentDoc)
+			delete documentDoc;
+
 		return false;
 	}
 
@@ -84,9 +88,13 @@ bool WordMarker2::FindWaterMark(){
 	// pic:nvPicPr
 	foundSize = 0;
 	xpathObj = NULL;
-	foundSize = documentDoc.xmlXPathFindObjects(picNode, BAD_CAST "pic:blipFill/a:blip", xpathObj);
+	foundSize = documentDoc->xmlXPathFindObjects(picNode, BAD_CAST "pic:blipFill/a:blip", xpathObj);
 	if (foundSize == 0) {
 		printfTrace("[AAA] can't find pic:blipFill element..");
+
+		if (documentDoc)
+			delete documentDoc;
+
 		return false;
 	}
 	nodes = xpathObj->nodesetval;
@@ -100,9 +108,13 @@ bool WordMarker2::FindWaterMark(){
 	if (!fs::exists(documentRelsPath))
 	{
 		printfTrace("[AAA] can't find file /word/_rels/document.xml.rels ..");
+
+		if (documentDoc)
+			delete documentDoc;
+
 		return false;
 	}
-	auto documentRelDoc = XMLOperation(documentRelsPath.string().data());
+	auto documentRelDoc = new XMLOperation(documentRelsPath.string().data());
 	foundSize = 0;
 	xpathObj = NULL;
 	firstNode = NULL;
@@ -114,9 +126,15 @@ bool WordMarker2::FindWaterMark(){
 	// 必须给他设置一个名字，并在这个namespace中进行xpath查询
 	boost::format fmt = boost::format("//null:Relationships/null:Relationship[@Id='%s']") % (char*)markedRelId;
 	std::string pattern = fmt.str();
-	foundSize = documentRelDoc.xmlXPathFindObjects(BAD_CAST pattern.data(), xpathObj);
+	foundSize = documentRelDoc->xmlXPathFindObjects(BAD_CAST pattern.data(), xpathObj);
 	if (foundSize == 0) {
 		printfTrace("[AAA] can't find Relationship element id is %d.", markedRelId);
+
+		if (documentDoc)
+			delete documentDoc;
+		if (documentRelDoc)
+			delete documentRelDoc;
+
 		return false;
 	}
 	nodes = xpathObj->nodesetval;
@@ -129,6 +147,10 @@ bool WordMarker2::FindWaterMark(){
 	m_bMarked = true;
 	printfTrace("Marked file %s, %d.", m_strWaterMarkFile.data(), m_bMarked);
 
+	if (documentDoc)
+		delete documentDoc;
+	if (documentRelDoc)
+		delete documentRelDoc;
 
 	return true;
 }
@@ -146,10 +168,16 @@ void WordMarker2::GetRelationFileMaxId(std::string relFilePath, std::string &max
 		xmlChar* targetProp = xmlGetProp(tmp, BAD_CAST "Target");
 
 		if (!rIdProp) {
+			xmlFree(targetProp);
+			xmlFree(typeProp);
+			xmlFree(rIdProp);
 			continue;
 		}
 
 		if (!typeProp) {
+			xmlFree(targetProp);
+			xmlFree(typeProp);
+			xmlFree(rIdProp);
 			continue;
 		}
 		vecRefId.push_back(std::string((char*)rIdProp));
@@ -263,8 +291,8 @@ bool WordMarker2::WaterMarkGenerate(std::string message){
 	}
 
 	std::vector<std::string> vecRefId;
-	auto documentRelDoc = XMLOperation(documentRelPath.string().data());
-	xmlNodePtr root = documentRelDoc.xmlGetRootNode();
+	auto documentRelDoc = new XMLOperation(documentRelPath.string().data());
+	xmlNodePtr root = documentRelDoc->xmlGetRootNode();
 
 	for (xmlNodePtr tmp = root->children; tmp != NULL; tmp = tmp->next) {
 
@@ -273,10 +301,16 @@ bool WordMarker2::WaterMarkGenerate(std::string message){
 		xmlChar* targetProp = xmlGetProp(tmp, BAD_CAST "Target");
 
 		if (!rIdProp) {
+			xmlFree(targetProp);
+			xmlFree(typeProp);
+			xmlFree(rIdProp);
 			continue;
 		}
 
 		if (!typeProp) {
+			xmlFree(targetProp);
+			xmlFree(typeProp);
+			xmlFree(rIdProp);
 			continue;
 		}
 		vecRefId.push_back(std::string((char*)rIdProp));
@@ -307,7 +341,7 @@ bool WordMarker2::WaterMarkGenerate(std::string message){
 
 	// [Content_Types].xml 需要有对header文件的引用
 	fs::path docContentTypePath = fs::path(m_strWordTempPath) / "[Content_Types].xml";
-	auto contentDoc = XMLOperation(docContentTypePath.string().data());
+	auto contentDoc = new XMLOperation(docContentTypePath.string().data());
 
 	// 检测 <Default Extension="png" ContentType="image/png"/>
 	// 如果不存在则添加
@@ -315,7 +349,7 @@ bool WordMarker2::WaterMarkGenerate(std::string message){
 	xmlNodePtr xxxNode = xmlNewNode(0, BAD_CAST "Default");
 	xmlNewProp(xxxNode, BAD_CAST "Extension", BAD_CAST "png");
 	xmlNewProp(xxxNode, BAD_CAST "ContentType", BAD_CAST "image/png");
-	xmlAddChild(contentDoc.xmlGetRootNode(), xxxNode);
+	xmlAddChild(contentDoc->xmlGetRootNode(), xxxNode);
 
 	//// 此处写入.bak文件考虑，创建 -> 删除 -> 改名的方式，防止冲突。
 	//// 创建临时文件
@@ -327,7 +361,8 @@ bool WordMarker2::WaterMarkGenerate(std::string message){
 	//
 	//// 修改文件名，替换原文件名。
 	//std::rename(tempPath.str().data(), docContentTypePath.str().data());
-	contentDoc.outputFile(docContentTypePath.string());
+	contentDoc->outputFile(docContentTypePath.string());
+	delete contentDoc;
 
 	maxId++;
 	std::string newMaxRelId = std::string(std::string("rId") + std::to_string(maxId));
@@ -339,24 +374,26 @@ bool WordMarker2::WaterMarkGenerate(std::string message){
 	xmlNewProp(newNode, BAD_CAST "Id", BAD_CAST newMaxRelId.data());
 	xmlNewProp(newNode, BAD_CAST "Type", BAD_CAST "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image");
 	xmlNewProp(newNode, BAD_CAST "Target", BAD_CAST "media/image1.png");
-	xmlAddChild(documentRelDoc.xmlGetRootNode(), newNode);
-	documentRelDoc.outputFile(documentRelPath.string());
+	xmlAddChild(documentRelDoc->xmlGetRootNode(), newNode);
+	documentRelDoc->outputFile(documentRelPath.string());
+	delete documentRelDoc;
 
 
 	std::string tplWaterMark = WordHiddenImageTemplte(newMaxRelId);
-
 	xmlDocPtr paragraphDoc = xmlReadMemory(
 		tplWaterMark.data(), tplWaterMark.length() + 1,
 		NULL, NULL, 0);
 
 	if (!paragraphDoc){
 		printfTrace("Read template failed \n");
+		xmlFreeDoc(paragraphDoc);
 		return false;
 	}
 
 	fs::path documentPath = fs::path(m_strWordTempPath) / "word/document.xml";;
 	if (!fs::exists(documentPath)){
 		printfTrace("failed to read from %s \n", documentPath.string().data());
+		xmlFreeDoc(paragraphDoc);
 		return false;
 	}
 
@@ -367,10 +404,13 @@ bool WordMarker2::WaterMarkGenerate(std::string message){
 	int foundSize = xmlOp->xmlXPathFindObjects(BAD_CAST "//w:p", xpathObj);
 	if (foundSize == 0) {
 		printfTrace("[AAA] does not enough paragraphs ..");
+		xmlFreeDoc(paragraphDoc);
+		delete xmlOp;
 		return false;
 	}
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
 
+	std::vector<xmlNodePtr> NodeList;
 	for (int i = 0; i < foundSize; i++){
 		xmlNodePtr firstNode = nodes->nodeTab[i];
 		xmlNodePtr paragraphNode = xmlDocCopyNode(
@@ -378,23 +418,30 @@ bool WordMarker2::WaterMarkGenerate(std::string message){
 			firstNode->doc,
 			1);
 
+		NodeList.push_back(paragraphNode);
+		
 		if (!paragraphNode){
-			std::cout << "Copy node failed." << std::endl;
-			return false;
+			goto cleanup;
 		}
 		xmlNodePtr addedNode = xmlAddChildList(firstNode, paragraphNode->children);
 		if (!addedNode) {
-			xmlFreeNode(paragraphNode);
-			return false;
+			goto cleanup;
 		}
-		paragraphNode->children = NULL; // Thanks to milaniez from stackoverflow
-		paragraphNode->last = NULL;     // for fixing
+		 paragraphNode->children = NULL; // Thanks to milaniez from stackoverflow
+		 paragraphNode->last = NULL;     // for fixing
 	}
-
+	
 	xmlOp->outputFile(documentPath.string());
 
+cleanup:
+	// clean xml Node
+	for (int i = 0; i < NodeList.size(); i++){
+		xmlFreeNode(NodeList[i]);
+	}
 	xmlFreeDoc(paragraphDoc);
-	delete xmlOp;
+	
+	if (xmlOp)
+		delete xmlOp;
 
 	return true;
 }
