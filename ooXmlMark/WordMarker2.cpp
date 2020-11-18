@@ -408,14 +408,16 @@ bool WordMarker2::readMark(std::string &message){
 
 	QRReader *qrr = new QRReader();
 
-	std::string qrMsg;
+	char* oldMessage = NULL;
 	std::string filepath = m_strWaterMarkFile;
 
-	qrr->ReadQR(filepath, qrMsg);
-	std::cout << "QR message:" << qrMsg << std::endl;
+	qrr->ReadQR(filepath.data(), &oldMessage);
+	std::cout << "QR message:" << oldMessage << std::endl;
 	delete qrr;
 
-	message = qrMsg;
+	message = std::string(oldMessage);
+	QRCommon::QRFree(oldMessage);
+
 	return true;
 }
 

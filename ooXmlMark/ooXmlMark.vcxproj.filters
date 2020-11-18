@@ -63,6 +63,9 @@
     <ClCompile Include="Util\mappedfile.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="parg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Minizip\crypt.h">
@@ -111,6 +114,9 @@
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="WordMarker2.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="parg.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

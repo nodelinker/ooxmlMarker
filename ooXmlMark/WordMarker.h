@@ -49,9 +49,6 @@ private:
 	std::string m_strWordFilePath = "";
 	std::string m_strWordTempPath = "";
 
-	// 涓€涓枃妗ｉ噷鍙兘瀛樺湪澶氫釜header鐨勬儏鍐碉紝demo鏆傛椂涓嶈€冭檻
-	// 鍋囧畾鍙湁涓€涓猦eader鏂囦欢琚紩鐢?
-	// 浣嗘槸杩欓噷浼氬奖鍝嶆按鍗版洿鏂板繀椤诲厛璇存槑
 	std::string m_strHeaderId = "";
 	std::string m_strHeaderTarget = "";
 	std::string m_strWaterMarkFile = "";

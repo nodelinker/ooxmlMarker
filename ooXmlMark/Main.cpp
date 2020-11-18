@@ -17,7 +17,9 @@
 #include "XmlOperation.h"
 //#include "WordMarker.h"
 #include "WordMarker2.h"
+#include "parg.h"
 
+#define __VERSION__ "1.0.0"
 
 namespace fs = boost::filesystem;
 
@@ -330,6 +332,13 @@ namespace fs = boost::filesystem;
 //	return 0;
 //}
 
+void PrintHelp(){
+	std::cout << "office word watermark demo version " << __VERSION__ << ", only support DOCX file format" << std::endl
+		<<"		-h	command line help" << std::endl
+		<<"		-i  输入word文件路径" << std::endl
+		<<"		-o	输出word文件路径" << std::endl
+		<<"		-m	水印信息" << std::endl;
+}
 
 int main(int argc, char **argv){
 
@@ -378,9 +387,47 @@ int main(int argc, char **argv){
 
 	// --------------------------------------------------------------------
 
-	fs::path demoPath = fs::current_path() / "demo.docx";
+
+	typedef struct globalArgs_t {
+		globalArgs_t() :inputFilePath(""), outputFilePath(""), newMessage(""){
+		}
+		std::string inputFilePath;              /* -i option */
+		std::string outputFilePath;				/* -o option */
+		std::string newMessage;					/* -m option */
+		bool bHelp;
+	} globalArgs;
+	globalArgs gArgs;
+
+
+	struct parg_state ps;
+	parg_init(&ps);
+
+	int opt = -1;
+	const char *optString = "i:o:m:h";
+	while ((opt = parg_getopt(&ps, argc, argv, optString)) != -1) {
+		switch (opt) {
+		case 'i':
+			gArgs.inputFilePath = ps.optarg;
+			break;
+		case 'o':
+			gArgs.outputFilePath = ps.optarg;
+			break;
+		case 'm':
+			gArgs.newMessage = ps.optarg;
+			break;
+		case 'h':
+			gArgs.bHelp = true;
+			break;
+		default:
+			PrintHelp();
+			return - 1;
+		}
+	}
+
+
+	fs::path demoPath = gArgs.inputFilePath;
 	if (!fs::exists(demoPath)){
-		std::cout << "demo.docx can't found." << "" << std::endl;
+		std::cout << gArgs.inputFilePath << " file can't found." << "" << std::endl;
 		return -1;
 	}
 
@@ -396,50 +443,23 @@ int main(int argc, char **argv){
 	}
 
 	WordMarker2 *wmk = new WordMarker2(demoPath.string(), tempDocPath.string());
+	if (wmk->isMarked()){
+		std::string oldMessage = wmk->readMark();
+		std::cout << gArgs.inputFilePath << " " << "file signature has been found :" << oldMessage << std::endl;
 
-
-	std::cout << "mark status : " << wmk->isMarked() << std::endl;
-	wmk->WaterMarkGenerate("hello marked.");
-	std::cout << "has been marked. " << std::endl;
-
-	fs::path output = fs::current_path() / "demo.marked.docx";
-	wmk->SaveToFile( output.string());
-
-	// *********************************************************
-
-	demoPath = fs::current_path() / "demo.marked.docx";
-	if (!fs::exists(demoPath)){
-		std::cout << "demo.docx can't found." << "" << std::endl;
-		return -1;
+		gArgs.newMessage.append(";");
+		gArgs.newMessage.append(oldMessage);
+		wmk->WaterMarkUpdate(gArgs.newMessage);
+		wmk->SaveToFile(gArgs.outputFilePath);
 	}
+	else{
+		std::cout << gArgs.inputFilePath << " " << "file signature not exists." << std::endl;
 
-	tempDocPath = fs::current_path() / fs::unique_path();
-	if (fs::exists(tempDocPath) && fs::is_directory(tempDocPath)){
-		std::cout << "tmp directory exists." << "" << std::endl;
-		return -1;
-	}
-
-	if (!fs::create_directory(tempDocPath)){
-		std::cout << "tmp directory can't create." << std::endl;
-		return -1;
-	}
-
-	WordMarker2 *wmk2 = new WordMarker2(demoPath.string(), tempDocPath.string());
-	std::cout << "mark status : " << wmk2->isMarked() << std::endl;
-
-	if (wmk2->isMarked()){
-
-		std::string message = wmk2->readMark();
-		message += "; updated";
-		wmk2->WaterMarkUpdate(message);
-		
-		fs::path output = fs::current_path() / "demo.updated.docx";
-		wmk2->SaveToFile(output.string());
-
+		wmk->WaterMarkGenerate(gArgs.newMessage);
+		wmk->SaveToFile(gArgs.outputFilePath);
 	}
 
 	delete wmk;
-	delete wmk2;
 
 	return 0;
 }

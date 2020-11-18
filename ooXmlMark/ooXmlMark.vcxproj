@@ -16,6 +16,7 @@
     <ClCompile Include="Minizip\iowin32.c" />
     <ClCompile Include="Minizip\unzip.c" />
     <ClCompile Include="Minizip\zip.c" />
+    <ClCompile Include="parg.cpp" />
     <ClCompile Include="Util\debug_printf.cpp" />
     <ClCompile Include="Util\Jinja2Light.cpp" />
     <ClCompile Include="Util\Logging.cpp" />
@@ -34,6 +35,7 @@
     <ClInclude Include="Minizip\zconf.h" />
     <ClInclude Include="Minizip\zip.h" />
     <ClInclude Include="Minizip\zlib.h" />
+    <ClInclude Include="parg.h" />
     <ClInclude Include="Util\debug_printf.h" />
     <ClInclude Include="Util\Jinja2Light.h" />
     <ClInclude Include="Util\Logging.h" />
@@ -96,7 +98,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>zlib.lib;libxml2.lib;QRManager.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>zlib.lib;libxml2.lib;QRManager.lib;getopt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/NODEFAULTLIB:library %(AdditionalOptions)</AdditionalOptions>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
