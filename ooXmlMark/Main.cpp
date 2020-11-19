@@ -12,7 +12,6 @@
 
 #include "ZipHelper2.h"
 #include "Util/Jinja2Light.h"
-#include "Util/Logging.h"
 
 #include "XmlOperation.h"
 //#include "WordMarker.h"

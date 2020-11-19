@@ -476,7 +476,6 @@ std::string WordMarker2::readMark(){
 	}
 
 	QRReader qrr = QRReader();
-
 	char *oldMessage = NULL;
 	std::string filepath = m_strWaterMarkFile;
 	qrr.ReadQR(filepath.data(), &oldMessage);
@@ -509,7 +508,7 @@ void WordMarker2::SaveToFile(std::string outputPath){
 	ZipHelper2 zh;
 	zh.ZipFile(m_strWordTempPath, outputPath);
 
-	fs::remove_all(m_strWordTempPath);
+	// fs::remove_all(m_strWordTempPath);
 }
 
 WordMarker2::~WordMarker2(){

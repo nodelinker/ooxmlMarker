@@ -55,6 +55,8 @@ bool dir_recursion(std::string src, int srcLength, std::map<std::string, std::st
 	HANDLE hFind = ::FindFirstFile((LPCTSTR)(inputPath + L"*").data(), &findFileData);
 	size_t file_name_len = 0;
 	if (hFind == INVALID_HANDLE_VALUE) {
+
+		printfTrace("FindFirstFile error: %d\n", ::GetLastError());
 		return false;
 	}
 	else {
@@ -199,10 +201,15 @@ int ZipHelper2::UnZipFile(std::string Src, std::string Dest)
 		//	fclose(fExists);
 		//}
 
+		if (fs::is_directory(fullPath)){
+			return 0;
+		}
+
 		FILE* fOut = NULL;
 		err = fopen_s(&fOut, fullPath.string().data(), "wb");
 		if (err != 0) {
 			printfTrace("error opening %s\n", fullPath.string().data());
+			return -1;
 		}
 		else {
 

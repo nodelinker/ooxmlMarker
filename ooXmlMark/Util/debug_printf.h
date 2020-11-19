@@ -13,7 +13,15 @@ extern const char *debug_printf_version;
 extern const char *debug_printf_level_config_name;
 extern const char *debug_printf_level_names[];
 
-enum { ALL, TRACE, DEBUG, INFO, WARNING, ERROR, NONE };
+enum { 
+	ALL, 
+	TRACE, 
+	DEBUG, 
+	INFO, 
+	WARNING, 
+	ERROR,
+	NONE
+};
 
 #define printfTrace(...) printfLog(TRACE, __FILE__, __LINE__, __VA_ARGS__)
 #define printfDebug(...) printfLog(DEBUG, __FILE__, __LINE__, __VA_ARGS__)
