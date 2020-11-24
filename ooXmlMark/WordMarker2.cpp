@@ -459,7 +459,7 @@ bool WordMarker2::readMark(std::string &message){
 	std::string filepath = m_strWaterMarkFile;
 
 	qrr->ReadQR(filepath.data(), &oldMessage);
-	std::cout << "QR message:" << oldMessage << std::endl;
+	std::cout << "Signature message:" << oldMessage << std::endl;
 	delete qrr;
 
 	message = std::string(oldMessage);
@@ -482,8 +482,10 @@ std::string WordMarker2::readMark(){
 
 	std::string ret(oldMessage);
 
-	std::cout << "QR message:" << oldMessage << std::endl;
+	std::cout << "Signature message:" << oldMessage << std::endl;
 	QRCommon::QRFree(oldMessage);
+
+	// std::string ret = "";
 	return ret;
 }
 
@@ -508,8 +510,11 @@ void WordMarker2::SaveToFile(std::string outputPath){
 	ZipHelper2 zh;
 	zh.ZipFile(m_strWordTempPath, outputPath);
 
-	// fs::remove_all(m_strWordTempPath);
+	fs::remove_all(m_strWordTempPath);
 }
 
 WordMarker2::~WordMarker2(){
+	
+	if (fs::exists(m_strWordTempPath))
+		fs::remove_all(m_strWordTempPath);
 }

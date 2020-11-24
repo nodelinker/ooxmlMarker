@@ -335,8 +335,9 @@ void PrintHelp(){
 	std::cout << "office word watermark demo version " << __VERSION__ << ", only support DOCX file format" << std::endl
 		<<"		-h	command line help" << std::endl
 		<<"		-i  输入word文件路径" << std::endl
-		<<"		-o	输出word文件路径" << std::endl
-		<<"		-m	水印信息" << std::endl;
+		<< "	-o	输出word文件路径" << std::endl
+		<< "	-r	检查并读取水印信息" << std::endl
+		<< "	-m	水印信息" << std::endl;
 }
 
 int main(int argc, char **argv){
@@ -394,15 +395,18 @@ int main(int argc, char **argv){
 		std::string outputFilePath;				/* -o option */
 		std::string newMessage;					/* -m option */
 		bool bHelp;
+		bool bCheckSig;
 	} globalArgs;
 	globalArgs gArgs;
 
+	gArgs.bHelp = false;
+	gArgs.bCheckSig = false;
 
 	struct parg_state ps;
 	parg_init(&ps);
 
 	int opt = -1;
-	const char *optString = "i:o:m:h";
+	const char *optString = "ri:o:m:h";
 	while ((opt = parg_getopt(&ps, argc, argv, optString)) != -1) {
 		switch (opt) {
 		case 'i':
@@ -414,9 +418,11 @@ int main(int argc, char **argv){
 		case 'm':
 			gArgs.newMessage = ps.optarg;
 			break;
+		case 'r':
+			gArgs.bCheckSig = true;
+			break;
 		case 'h':
 			gArgs.bHelp = true;
-			break;
 		default:
 			PrintHelp();
 			return - 1;
@@ -430,6 +436,7 @@ int main(int argc, char **argv){
 		return -1;
 	}
 
+
 	fs::path tempDocPath = fs::current_path() / fs::unique_path();
 	if (fs::exists(tempDocPath) && fs::is_directory(tempDocPath)){
 		std::cout << "tmp directory exists." << "" << std::endl;
@@ -441,48 +448,77 @@ int main(int argc, char **argv){
 		return -1;
 	}
 
-
-	while (true)
-	{
+	if (gArgs.bCheckSig){
 		WordMarker2 *wmk = new WordMarker2(demoPath.string(), tempDocPath.string());
-		if (wmk->isMarked()){
-			std::string oldMessage = wmk->readMark();
-			std::cout << gArgs.inputFilePath << " " << "file signature has been found :" << oldMessage << std::endl;
 
-			gArgs.newMessage.append(";");
-			gArgs.newMessage.append(oldMessage);
-			wmk->WaterMarkUpdate(gArgs.newMessage);
-			wmk->SaveToFile(gArgs.outputFilePath);
+		if (wmk->isMarked()){
+			std::cout << "found signature!!!!" << std::endl;
+			std::string message = wmk->readMark();
+			std::cout << "Signature:" << message << std::endl;
 		}
 		else{
-			std::cout << gArgs.inputFilePath << " " << "file signature not exists." << std::endl;
-
-			wmk->WaterMarkGenerate(gArgs.newMessage);
-			wmk->SaveToFile(gArgs.outputFilePath);
+			std::cout << "not found signature!!!!" << std::endl;
 		}
+		std::cout << "DONE." << std::endl;
 		delete wmk;
-		
-		fs::remove(gArgs.outputFilePath);
-		Sleep(1000);
+
+
+		return 0;
 	}
 
-	//WordMarker2 *wmk = new WordMarker2(demoPath.string(), tempDocPath.string());
-	//if (wmk->isMarked()){
-	//	std::string oldMessage = wmk->readMark();
-	//	std::cout << gArgs.inputFilePath << " " << "file signature has been found :" << oldMessage << std::endl;
 
-	//	gArgs.newMessage.append(";");
-	//	gArgs.newMessage.append(oldMessage);
-	//	wmk->WaterMarkUpdate(gArgs.newMessage);
-	//	wmk->SaveToFile(gArgs.outputFilePath);
-	//}
-	//else{
-	//	std::cout << gArgs.inputFilePath << " " << "file signature not exists." << std::endl;
+	//while (true)
+	//{
+	//	WordMarker2 *wmk = new WordMarker2(demoPath.string(), tempDocPath.string());
+	//	if (wmk->isMarked()){
+	//		std::string oldMessage = wmk->readMark();
+	//		std::cout << gArgs.inputFilePath << " " << "file signature has been found :" << oldMessage << std::endl;
 
-	//	wmk->WaterMarkGenerate(gArgs.newMessage);
-	//	wmk->SaveToFile(gArgs.outputFilePath);
+	//		gArgs.newMessage.append(";");
+	//		gArgs.newMessage.append(oldMessage);
+	//		wmk->WaterMarkUpdate(gArgs.newMessage);
+	//		wmk->SaveToFile(gArgs.outputFilePath);
+	//	}
+	//	else{
+	//		std::cout << gArgs.inputFilePath << " " << "file signature not exists." << std::endl;
+
+	//		wmk->WaterMarkGenerate(gArgs.newMessage);
+	//		wmk->SaveToFile(gArgs.outputFilePath);
+	//	}
+	//	delete wmk;
+	//	
+	//	fs::remove(gArgs.outputFilePath);
+	//	Sleep(1000);
 	//}
-	//delete wmk;
+
+	WordMarker2 *wmk = new WordMarker2(demoPath.string(), tempDocPath.string());
+	if (wmk->isMarked()){
+		std::string oldMessage = wmk->readMark();
+		std::cout << gArgs.inputFilePath << " " << "file signature has been found :" << oldMessage << std::endl;
+
+		gArgs.newMessage.append(";");
+		gArgs.newMessage.append(oldMessage);
+		if (!wmk->WaterMarkUpdate(gArgs.newMessage)){
+			std::cout << "signature updated done!!!!" << std::endl;
+		}
+		wmk->SaveToFile(gArgs.outputFilePath);
+
+		std::cout << "signature updated done!!!!" << std::endl;
+		std::cout << "checkout file: " << gArgs.outputFilePath << std::endl;
+	}
+	else{
+		std::cout << "file:" << gArgs.inputFilePath << " " << " is a none signature file." << std::endl;
+
+		if (!wmk->WaterMarkGenerate(gArgs.newMessage)){
+			std::cout << "signature failed!!!!" << std::endl;
+			return -1;
+		}
+		wmk->SaveToFile(gArgs.outputFilePath);
+
+		std::cout << "signature has done!!!!" << std::endl;
+		std::cout << "checkout file: " << gArgs.outputFilePath << std::endl;
+	}
+	delete wmk;
 
 	return 0;
 }
