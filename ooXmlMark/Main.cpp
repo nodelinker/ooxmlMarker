@@ -22,6 +22,7 @@
 
 namespace fs = boost::filesystem;
 
+
 //const fs::path wordTemplates = fs::current_path() / "templates" / "word";
 //const fs::path excelTemplates = fs::current_path() / "templates" / "excel";
 //const fs::path pptTemplates = fs::current_path() / "templates" / "ppt";

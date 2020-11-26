@@ -36,9 +36,6 @@
     <ClCompile Include="Util\Jinja2Light.cpp">
       <Filter>Util</Filter>
     </ClCompile>
-    <ClCompile Include="Util\Logging.cpp">
-      <Filter>Util</Filter>
-    </ClCompile>
     <ClCompile Include="Util\StringHelper.cpp">
       <Filter>Util</Filter>
     </ClCompile>
@@ -66,6 +63,9 @@
     <ClCompile Include="parg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Util\Logger.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Minizip\crypt.h">
@@ -81,9 +81,6 @@
       <Filter>Minizip</Filter>
     </ClInclude>
     <ClInclude Include="Util\Jinja2Light.h">
-      <Filter>Util</Filter>
-    </ClInclude>
-    <ClInclude Include="Util\Logging.h">
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="Util\StringHelper.h">
@@ -118,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="parg.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Logger.h">
+      <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

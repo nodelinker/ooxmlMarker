@@ -14,7 +14,7 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "../Util/Logging.h"
+#include "../Util/debug_printf.h"
 #include "../Util/StringHelper.h"
 
 
@@ -79,9 +79,10 @@ public:
 
 			/* do register namespace */
 			if (xmlXPathRegisterNs(xpathCtx, prefix, href) != 0) {
-				// SPDLOG_ERROR("Error: unable to register NS with prefix=\"{}\" and href=\"{}\"", prefix, href);
-				auto msg = boost::format("Error: unable to register NS with prefix=\"%s\" and href=\"%s\"") % prefix % href;
-				BOOST_LOG_TRIVIAL(info) << msg.str();
+				//auto msg = boost::format("Error: unable to register NS with prefix=\"%s\" and href=\"%s\"") % prefix % href;
+				//BOOST_LOG_TRIVIAL(info) << msg.str();
+
+				printfTrace("Error: unable to register NS with prefix=\"%s\" and href=\"%s\"", prefix, href);
 				return;
 			}
 		}
@@ -92,7 +93,7 @@ public:
 	void xmlXPathRegisterNamespace(std::vector<std::string> &vec) {
 
 		if (vec.empty()) {
-			BOOST_LOG_TRIVIAL(info) << "register namespace must not empty!";
+			printfTrace("register namespace must not empty!");
 			return;
 		}
 
@@ -119,9 +120,10 @@ public:
 
 			/* do register namespace */
 			if (xmlXPathRegisterNs(xpathCtx, (const xmlChar*)prefix.data(),(const xmlChar*)href.data()) != 0) {
+				//auto msg = boost::format("Error: unable to register NS with prefix=\"%s\" and href=\"%s\"") % prefix % href;
+				//BOOST_LOG_TRIVIAL(error) << msg.str();
 
-				auto msg = boost::format("Error: unable to register NS with prefix=\"%s\" and href=\"%s\"") % prefix % href;
-				BOOST_LOG_TRIVIAL(error) << msg.str();
+				printfTrace("Error: unable to register NS with prefix=\"%s\" and href=\"%s\"", prefix, href);
 				return ;
 			}
 		}
@@ -134,9 +136,9 @@ public:
 
 		xpathObj = xmlXPathEvalExpression(xpathExpr, xpathCtx);
 		if (xpathObj == NULL) {
-			// SPDLOG_ERROR("Error: unable to evaluate xpath expression \"{}\"", xpathExpr);
-			auto msg = boost::format("Error: unable to evaluate xpath expression \"%s\"") % xpathExpr;
-			BOOST_LOG_TRIVIAL(error) << msg.str();
+			//auto msg = boost::format("Error: unable to evaluate xpath expression \"%s\"") % xpathExpr;
+			//BOOST_LOG_TRIVIAL(error) << msg.str();
+			printfTrace("Error: unable to evaluate xpath expression \"%s\"", xpathExpr);
 
 			xmlXPathFreeContext(xpathCtx);
 			// xmlFreeDoc(doc);
@@ -155,9 +157,9 @@ public:
 
 		xpathObj = xmlXPathNodeEval(node, xpathExpr, xpathCtx);
 		if (xpathObj == NULL) {
-			// SPDLOG_ERROR("Error: unable to evaluate xpath expression \"{}\"", xpathExpr);
-			auto msg = boost::format("Error: unable to evaluate xpath expression \"{%s}\"") % xpathExpr;
-			BOOST_LOG_TRIVIAL(error) << msg.str();
+			//auto msg = boost::format("Error: unable to evaluate xpath expression \"{%s}\"") % xpathExpr;
+			//BOOST_LOG_TRIVIAL(error) << msg.str();
+			printfTrace("Error: unable to evaluate xpath expression \"{%s}\"", xpathExpr);
 
 			xmlXPathFreeContext(xpathCtx);
 			// xmlFreeDoc(doc);
@@ -179,9 +181,9 @@ public:
 
 		xpathObj = xmlXPathEvalExpression(xpathExpr, xpathCtx);
 		if (xpathObj == NULL) {
-			// SPDLOG_ERROR("Error: unable to evaluate xpath expression \"{}\"", xpathExpr);
-			auto msg = boost::format("Error: unable to evaluate xpath expression \"{%s}\"") % xpathExpr;
-			BOOST_LOG_TRIVIAL(error) << msg.str();
+			//auto msg = boost::format("Error: unable to evaluate xpath expression \"{%s}\"") % xpathExpr;
+			//BOOST_LOG_TRIVIAL(error) << msg.str();
+			printfTrace("Error: unable to evaluate xpath expression \"{%s}\"", xpathExpr);
 
 			xmlXPathFreeContext(xpathCtx);
 			// xmlFreeDoc(doc);
@@ -200,10 +202,10 @@ public:
 		
 		xpathObj = xmlXPathEvalExpression(xpathExpr, xpathCtx);
 		if (xpathObj == NULL) {
-			// SPDLOG_ERROR("Error: unable to evaluate xpath expression \"{}\"", xpathExpr);
 
-			auto msg = boost::format("Error: unable to evaluate xpath expression \"{%s}\"") % xpathExpr;
-			BOOST_LOG_TRIVIAL(error) << msg.str();
+			//auto msg = boost::format("Error: unable to evaluate xpath expression \"{%s}\"") % xpathExpr;
+			//BOOST_LOG_TRIVIAL(error) << msg.str();
+			printfTrace("Error: unable to evaluate xpath expression \"{%s}\"", xpathExpr);
 
 			xmlXPathFreeContext(xpathCtx);
 			// xmlFreeDoc(doc);
@@ -344,8 +346,8 @@ protected:
 
 		doc = xmlReadMemory(content, length, "Document.xml", NULL, 0);
 		if (doc == NULL) {
-			//SPDLOG_ERROR("read xml memory error.");
-			BOOST_LOG_TRIVIAL(error) << "read xml memory error.";
+			// BOOST_LOG_TRIVIAL(error) << "read xml memory error.";
+			printfTrace("read xml memory error.");
 			return false;
 		}
 
@@ -353,8 +355,8 @@ protected:
 		/* Create xpath evaluation context */
 		xpathCtx = xmlXPathNewContext(doc);
 		if (xpathCtx == NULL) {
-			// SPDLOG_ERROR("unable to create new XPath context\n");
-			BOOST_LOG_TRIVIAL(error) << "unable to create new XPath context";
+			// BOOST_LOG_TRIVIAL(error) << "unable to create new XPath context";
+			printfTrace("unable to create new XPath context");
 			return false;
 		}
 
@@ -366,18 +368,19 @@ protected:
 		/* Load XML document */
 		doc = xmlParseFile(filepath);
 		if (doc == NULL) {
-			// SPDLOG_ERROR("unable to parse file \"{}\"\n", filepath);
-			auto msg = boost::format("unable to parse file \"{%s}\"") % filepath;
-			BOOST_LOG_TRIVIAL(error) << msg.str();
+			//auto msg = boost::format("unable to parse file \"{%s}\"") % filepath;
+			//BOOST_LOG_TRIVIAL(error) << msg.str();
+			printfTrace("unable to parse file \"{%s}\"", filepath);
 			return false;
 		}
 
 		/* Create xpath evaluation context */
 		xpathCtx = xmlXPathNewContext(doc);
 		if (xpathCtx == NULL) {
-			// SPDLOG_ERROR("unable to create new XPath context\n");
-			auto msg = boost::format("unable to create new XPath context");
-			BOOST_LOG_TRIVIAL(error) << msg.str();
+			//auto msg = boost::format("unable to create new XPath context");
+			//BOOST_LOG_TRIVIAL(error) << msg.str();
+			printfTrace("unable to create new XPath context\n");
+
 			return false;
 		}
 

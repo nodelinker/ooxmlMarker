@@ -19,7 +19,7 @@
     <ClCompile Include="parg.cpp" />
     <ClCompile Include="Util\debug_printf.cpp" />
     <ClCompile Include="Util\Jinja2Light.cpp" />
-    <ClCompile Include="Util\Logging.cpp" />
+    <ClCompile Include="Util\Logger.cpp" />
     <ClCompile Include="Util\mappedfile.cpp" />
     <ClCompile Include="Util\StringHelper.cpp" />
     <ClCompile Include="WordMarker.cpp" />
@@ -38,7 +38,7 @@
     <ClInclude Include="parg.h" />
     <ClInclude Include="Util\debug_printf.h" />
     <ClInclude Include="Util\Jinja2Light.h" />
-    <ClInclude Include="Util\Logging.h" />
+    <ClInclude Include="Util\Logger.h" />
     <ClInclude Include="Util\mappedfile.h" />
     <ClInclude Include="Util\StringHelper.h" />
     <ClInclude Include="WordMarker.h" />
